@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Domain\Repository;
+
+use {{ namespace }}\Domain\Model\{{ module }};
+
+interface {{ module }}RepositoryInterface
+{
+    /**
+     * @return list<{{ module }}>
+     */
+    public function findAll(int $limit = 50, int $offset = 0): array;
+
+    public function findById(int $id): ?{{ module }};
+
+    public function save({{ module }} ${{ moduleVariable }}): {{ module }};
+
+    public function delete({{ module }} ${{ moduleVariable }}): void;
+
+    public function count(): int;
+}

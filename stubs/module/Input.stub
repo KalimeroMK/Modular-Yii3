@@ -1,0 +1,16 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Application\Dto;
+
+{{ inputUses }}
+
+/**
+ * Hydrated from the request body and validated before the action runs.
+ */
+#[FromBody]
+final class {{ module }}Input extends AbstractInput
+{
+{{ inputProperties }}
+}

@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+use Yiisoft\Router\Group;
+use Yiisoft\Router\Route;
+use {{ namespace }}\Application\Action\CreateAction;
+use {{ namespace }}\Application\Action\DeleteAction;
+use {{ namespace }}\Application\Action\IndexAction;
+use {{ namespace }}\Application\Action\UpdateAction;
+use {{ namespace }}\Application\Action\ViewAction;
+
+return [
+    Group::create('/api/{{ routeSegment }}')
+        ->routes(
+            Route::get('')
+                ->action(IndexAction::class)
+                ->name('{{ routeName }}/index'),
+            Route::get('/{id:\d+}')
+                ->action(ViewAction::class)
+                ->name('{{ routeName }}/view'),
+            Route::post('')
+                ->action(CreateAction::class)
+                ->name('{{ routeName }}/create'),
+            Route::put('/{id:\d+}')
+                ->action(UpdateAction::class)
+                ->name('{{ routeName }}/update'),
+            Route::delete('/{id:\d+}')
+                ->action(DeleteAction::class)
+                ->name('{{ routeName }}/delete'),
+        ),
+];

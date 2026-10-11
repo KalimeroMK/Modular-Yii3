@@ -1,0 +1,20 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Domain\Enum;
+
+use function array_column;
+
+enum {{ enumName }}: string
+{
+{{ enumCases }}
+
+    /**
+     * @return list<string>
+     */
+    public static function values(): array
+    {
+        return array_column(self::cases(), 'value');
+    }
+}

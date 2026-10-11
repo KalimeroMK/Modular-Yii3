@@ -1,0 +1,10 @@
+<?php
+
+declare(strict_types=1);
+
+use {{ namespace }}\Domain\Repository\{{ module }}RepositoryInterface;
+use {{ namespace }}\Infrastructure\Persistence\ActiveRecord{{ module }}Repository;
+
+return [
+    {{ module }}RepositoryInterface::class => ActiveRecord{{ module }}Repository::class,
+];

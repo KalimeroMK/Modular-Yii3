@@ -1,0 +1,26 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Infrastructure\Migration;
+
+use Yiisoft\Db\Migration\MigrationBuilder;
+use Yiisoft\Db\Migration\RevertibleMigrationInterface;
+use Yiisoft\Db\Migration\TransactionalMigrationInterface;
+
+final class {{ migrationClass }} implements RevertibleMigrationInterface, TransactionalMigrationInterface
+{
+    public function up(MigrationBuilder $b): void
+    {
+        $cb = $b->columnBuilder();
+
+        $b->createTable('{{ table }}', [
+{{ migrationColumns }}
+        ]);
+{{ migrationIndexes }}{{ migrationForeignKeys }}{{ migrationJunctionTables }}    }
+
+    public function down(MigrationBuilder $b): void
+    {
+{{ migrationJunctionDrops }}        $b->dropTable('{{ table }}');
+    }
+}

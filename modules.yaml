@@ -1,0 +1,37 @@
+# Describe your modules here, then run:
+#
+#   ./yii module:build
+#   ./yii migrate:up
+#
+# Field types: string, text, integer, bigint, float, decimal, boolean, json, date, datetime,
+#              timestamp, time, uuid, enum. Add `?` for nullable, `:args` for size/scale/values.
+# Relations:   belongsTo, hasOne, hasMany, belongsToMany.
+
+modules:
+  Product:
+    fields:
+      name: string:120
+      slug: { type: string, size: 150, unique: true }
+      price: decimal:10,2
+      is_active: boolean
+      status: enum:draft,published,archived
+      metadata: json?
+      description: text?
+      published_at: datetime?
+    relations:
+      category: belongsTo:Category
+      tags: belongsToMany:Tag
+
+  Category:
+    fields:
+      name: string:120
+      slug: { type: string, size: 150, unique: true }
+    relations:
+      products: hasMany:Product
+
+  Tag:
+    fields:
+      name: string:60
+      color: string:7
+    relations:
+      products: belongsToMany:Product

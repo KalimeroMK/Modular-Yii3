@@ -1,0 +1,35 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Application\Dto;
+
+use {{ namespace }}\Domain\Model\{{ module }};
+
+use function array_map;
+
+/**
+ * Shapes a {{ module }} for the API response.
+ */
+final class {{ module }}Resource
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public static function toArray({{ module }} $model): array
+    {
+        return [
+{{ resourceFields }}
+        ];
+    }
+
+    /**
+     * @param list<{{ module }}> $models
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function toArrayList(array $models): array
+    {
+        return array_map(self::toArray(...), $models);
+    }
+}

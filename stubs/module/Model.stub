@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Domain\Model;
+
+{{ modelUses }}
+
+/**
+ * Generated from `modules.yaml`. Edit it freely: the generator never overwrites an existing file without `--force`.
+ */
+final class {{ module }} extends ActiveRecord
+{
+{{ modelProperties }}
+
+    public function tableName(): string
+    {
+        return '{{ tableExpression }}';
+    }
+
+    public function relationQuery(string $name): ActiveQueryInterface
+    {
+        return match ($name) {
+{{ relationArms }}            default => parent::relationQuery($name),
+        };
+    }
+}

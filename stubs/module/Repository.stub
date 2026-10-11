@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Infrastructure\Persistence;
+
+{{ repositoryUses }}
+
+final class ActiveRecord{{ module }}Repository implements {{ module }}RepositoryInterface
+{
+    public function findAll(int $limit = 50, int $offset = 0): array
+    {
+        /** @var list<{{ module }}> */
+        return {{ module }}::query(){{ notDeletedFilter }}
+            ->orderBy(['id' => SORT_DESC])
+            ->limit($limit)
+            ->offset($offset)
+            ->all();
+    }
+
+    public function findById(int $id): ?{{ module }}
+    {
+        /** @var {{ module }}|null */
+        return {{ module }}::query(){{ notDeletedFilter }}
+            ->andWhere(['id' => $id])
+            ->one();
+    }
+
+    public function save({{ module }} ${{ moduleVariable }}): {{ module }}
+    {
+{{ timestampBlock }}        ${{ moduleVariable }}->save();
+
+        return ${{ moduleVariable }};
+    }
+
+    public function delete({{ module }} ${{ moduleVariable }}): void
+    {
+{{ deleteBody }}    }
+
+    public function count(): int
+    {
+        return (int) {{ module }}::query(){{ notDeletedFilter }}
+            ->count();
+    }
+}

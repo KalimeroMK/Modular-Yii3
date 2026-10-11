@@ -1,0 +1,61 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Application\Service;
+
+{{ serviceUses }}
+
+final readonly class {{ module }}Service
+{
+    public function __construct(private {{ module }}RepositoryInterface $repository) {}
+
+    /**
+     * @return list<{{ module }}>
+     */
+    public function list(int $limit = 50, int $offset = 0): array
+    {
+        return $this->repository->findAll($limit, $offset);
+    }
+
+    public function count(): int
+    {
+        return $this->repository->count();
+    }
+
+    /**
+     * @throws {{ module }}NotFoundException
+     */
+    public function get(int $id): {{ module }}
+    {
+        return $this->repository->findById($id) ?? throw {{ module }}NotFoundException::withId($id);
+    }
+
+    public function create({{ module }}Input $input): {{ module }}
+    {
+        return $this->repository->save($this->fill(new {{ module }}(), $input));
+    }
+
+    /**
+     * @throws {{ module }}NotFoundException
+     */
+    public function update(int $id, {{ module }}Input $input): {{ module }}
+    {
+        return $this->repository->save($this->fill($this->get($id), $input));
+    }
+
+    /**
+     * @throws {{ module }}NotFoundException
+     */
+    public function delete(int $id): void
+    {
+        $this->repository->delete($this->get($id));
+    }
+
+    private function fill({{ module }} ${{ moduleVariable }}, {{ module }}Input $input): {{ module }}
+    {
+{{ assignments }}
+
+        return ${{ moduleVariable }};
+    }
+}

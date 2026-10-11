@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Domain\Exception;
+
+use RuntimeException;
+use Yiisoft\FriendlyException\FriendlyExceptionInterface;
+
+use function sprintf;
+
+final class {{ module }}NotFoundException extends RuntimeException implements FriendlyExceptionInterface
+{
+    public static function withId(int $id): self
+    {
+        return new self(sprintf('{{ module }} with id %d was not found.', $id));
+    }
+
+    public function getName(): string
+    {
+        return '{{ module }} not found';
+    }
+
+    public function getSolution(): ?string
+    {
+        return 'Check the identifier in the request, or list the available records first.';
+    }
+}

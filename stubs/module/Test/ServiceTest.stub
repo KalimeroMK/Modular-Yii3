@@ -1,0 +1,94 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Tests\Modules\{{ module }};
+
+use App\Tests\Support\ModuleTestCase;
+use {{ namespace }}\Application\Dto\{{ module }}Input;
+use {{ namespace }}\Application\Dto\{{ module }}Resource;
+use {{ namespace }}\Application\Service\{{ module }}Service;
+use {{ namespace }}\Domain\Exception\{{ module }}NotFoundException;
+use {{ namespace }}\Infrastructure\Migration\{{ migrationClass }};
+use {{ namespace }}\Infrastructure\Persistence\ActiveRecord{{ module }}Repository;
+
+final class {{ module }}ServiceTest extends ModuleTestCase
+{
+    private {{ module }}Service $service;
+
+    public function testCreateStoresTheInput(): void
+    {
+        ${{ moduleVariable }} = $this->service->create($this->makeInput());
+
+        self::assertGreaterThan(0, ${{ moduleVariable }}->id);
+{{ testAssertionsCreated }}
+    }
+
+    public function testGetReturnsTheStoredRecord(): void
+    {
+        $created = $this->service->create($this->makeInput());
+
+        self::assertSame($created->id, $this->service->get($created->id)->id);
+    }
+
+    public function testGetThrowsWhenMissing(): void
+    {
+        $this->expectException({{ module }}NotFoundException::class);
+
+        $this->service->get(404);
+    }
+
+    public function testUpdateChangesStoredValues(): void
+    {
+        $created = $this->service->create($this->makeInput());
+
+        $updated = $this->service->update($created->id, $this->makeUpdatedInput());
+
+        self::assertSame($created->id, $updated->id);
+{{ testAssertionsUpdated }}
+    }
+
+    public function testDeleteRemovesTheRecord(): void
+    {
+        $created = $this->service->create($this->makeInput());
+
+        $this->service->delete($created->id);
+
+        self::assertSame(0, $this->service->count());
+    }
+
+    public function testResourceExposesTheIdentifier(): void
+    {
+        $created = $this->service->create($this->makeInput());
+
+        self::assertSame($created->id, {{ module }}Resource::toArray($created)['id']);
+    }
+
+    protected function migrations(): array
+    {
+        return [new {{ migrationClass }}()];
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->service = new {{ module }}Service(new ActiveRecord{{ module }}Repository());
+    }
+
+    private function makeInput(): {{ module }}Input
+    {
+        $input = new {{ module }}Input();
+{{ testInputAssignments }}
+
+        return $input;
+    }
+
+    private function makeUpdatedInput(): {{ module }}Input
+    {
+        $input = new {{ module }}Input();
+{{ testUpdatedInputAssignments }}
+
+        return $input;
+    }
+}

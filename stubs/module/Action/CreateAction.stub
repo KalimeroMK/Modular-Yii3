@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Application\Action;
+
+use Psr\Http\Message\ResponseInterface;
+use Yiisoft\DataResponse\ResponseFactory\JsonResponseFactory;
+use Yiisoft\Http\Status;
+use {{ namespace }}\Application\Dto\{{ module }}Input;
+use {{ namespace }}\Application\Dto\{{ module }}Resource;
+use {{ namespace }}\Application\Service\{{ module }}Service;
+
+final readonly class CreateAction
+{
+    public function __construct(
+        private {{ module }}Service $service,
+        private JsonResponseFactory $responseFactory,
+    ) {}
+
+    public function __invoke({{ module }}Input $input): ResponseInterface
+    {
+        $result = $input->getValidationResult();
+
+        if (!$result->isValid()) {
+            return $this->responseFactory->createResponse(
+                ['error' => 'Validation failed', 'details' => $result->getErrorMessagesIndexedByProperty()],
+                Status::UNPROCESSABLE_ENTITY,
+            );
+        }
+
+        return $this->responseFactory->createResponse(
+            ['data' => {{ module }}Resource::toArray($this->service->create($input))],
+            Status::CREATED,
+        );
+    }
+}

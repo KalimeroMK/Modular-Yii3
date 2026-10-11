@@ -50,6 +50,59 @@ final class ModuleGeneratorTest extends TestCase
         self::assertContains('tests/Modules/Product/ProductServiceTest.php', $paths);
     }
 
+    public function testMorphRelationIsNarrowedWithAnOnCondition(): void
+    {
+        $definitions = (new YamlModuleParser())->parse([
+            'modules' => [
+                'Product' => [
+                    'fields' => ['name' => 'string'],
+                    'relations' => ['comments' => 'morphMany:Comment:commentable'],
+                ],
+                'Comment' => ['fields' => ['body' => 'text']],
+            ],
+        ]);
+
+        $model = $this->generator->files($definitions[0])['src/Modules/Product/Domain/Model/Product.php'];
+
+        self::assertStringContainsString(
+            "'comments' => \$this->hasMany(Comment::class, ['commentable_id' => 'id'])",
+            $model,
+        );
+        self::assertStringContainsString("->on(['commentable_type' => 'product'])", $model);
+    }
+
+    public function testMorphTargetGetsAResolverAndACompositeIndex(): void
+    {
+        $definitions = (new YamlModuleParser())->parse([
+            'modules' => [
+                'Product' => [
+                    'fields' => ['name' => 'string'],
+                    'relations' => ['comments' => 'morphMany:Comment:commentable'],
+                ],
+                'Comment' => ['fields' => ['body' => 'text']],
+            ],
+        ]);
+
+        $files = $this->generator->files($definitions[1]);
+        $resolver = $files['src/Modules/Comment/Application/Service/CommentableResolver.php'];
+        $migration = '';
+
+        foreach ($files as $path => $content) {
+            if (str_contains($path, '/Migration/')) {
+                $migration = $content;
+            }
+        }
+
+        self::assertNotSame('', $migration, 'the module has no migration');
+        self::assertStringContainsString("'product' => Product::class,", $resolver);
+        self::assertStringContainsString('public function resolve(Comment $model): ?ActiveRecordInterface', $resolver);
+        self::assertStringContainsString(
+            "\$b->createIndex('comments', 'idx_comments_commentable', ['commentable_type', 'commentable_id']);",
+            $migration,
+        );
+        self::assertSame(0, $this->lint($resolver));
+    }
+
     public function testApiAndTestsCanBeTurnedOff(): void
     {
         $definition = $this->definition(api: false, tests: false);

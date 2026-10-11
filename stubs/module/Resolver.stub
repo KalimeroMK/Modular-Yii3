@@ -1,0 +1,49 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{ namespace }}\Application\Service;
+
+{{ resolverUses }}
+
+use function array_keys;
+
+/**
+ * Walks a {{ module }} back to the record that owns it.
+ *
+ * Active Record cannot express the inverse of a polymorphic relation, because the target class differs per
+ * row, so the mapping lives here rather than on the model. Add an entry when a new module starts owning
+ * {{ module }} records.
+ */
+final class {{ resolverClass }}
+{
+    /**
+     * @var array<string, class-string<ActiveRecordInterface>>
+     */
+    private const MAP = [
+{{ resolverMap }}
+    ];
+
+    public function resolve({{ module }} $model): ?ActiveRecordInterface
+    {
+        $class = self::MAP[$model->{{ morphTypeColumn }}] ?? null;
+
+        if ($class === null) {
+            return null;
+        }
+
+        $record = $class::query()->findByPk($model->{{ morphIdColumn }});
+
+        return $record instanceof ActiveRecordInterface ? $record : null;
+    }
+
+    /**
+     * The values accepted in the `{{ morphTypeColumn }}` column.
+     *
+     * @return list<string>
+     */
+    public static function types(): array
+    {
+        return array_keys(self::MAP);
+    }
+}

@@ -7,8 +7,10 @@ namespace App\Core\Module;
 use App\Core\Module\Definition\Field;
 use App\Core\Module\Definition\FieldType;
 use App\Core\Module\Definition\ModuleDefinition;
+use App\Core\Module\Definition\MorphTarget;
 use App\Core\Module\Definition\Relation;
 use App\Core\Module\Definition\RelationType;
+use Yiisoft\ActiveRecord\ActiveRecordInterface;
 
 use function array_map;
 use function array_unique;
@@ -173,6 +175,19 @@ final readonly class CodeFragments
                     $field->name,
                 );
             }
+        }
+
+        foreach ($this->module->indexes as $index) {
+            $columns = implode(
+                ', ',
+                array_map(static fn(string $column): string => var_export($column, true), $index['columns']),
+            );
+            $lines[] = sprintf(
+                "        \$b->createIndex('%s', '%s', [%s]);",
+                $this->module->table,
+                $index['name'],
+                $columns,
+            );
         }
 
         return $lines === [] ? '' : "\n" . implode("\n", $lines) . "\n";
@@ -406,6 +421,37 @@ final readonly class CodeFragments
         return implode("\n", $lines);
     }
 
+    /**
+     * The `use` block of a generated morph resolver: the target model plus every owning model.
+     */
+    public function resolverUses(MorphTarget $target): string
+    {
+        $uses = [
+            ActiveRecordInterface::class,
+            $this->module->namespace() . '\\Domain\\Model\\' . $this->module->name,
+        ];
+
+        foreach ($target->owners as $owner) {
+            $uses[] = sprintf('App\\Modules\\%s\\Domain\\Model\\%s', $owner, $owner);
+        }
+
+        return $this->useStatements($uses);
+    }
+
+    /**
+     * The stored type value mapped to the owning model class.
+     */
+    public function resolverMap(MorphTarget $target): string
+    {
+        $lines = [];
+
+        foreach ($target->owners as $alias => $owner) {
+            $lines[] = sprintf("        %s => %s::class,", var_export($alias, true), $owner);
+        }
+
+        return implode("\n", $lines);
+    }
+
     public function enumCases(Field $field): string
     {
         $lines = [];
@@ -540,7 +586,25 @@ final readonly class CodeFragments
                 (string) $relation->junctionTable,
                 Naming::foreignKey($this->module->name),
             ),
+            // Active Record has no polymorphic relation, but an ON condition narrows the query the same way,
+            // and it is applied to lazy loading, eager loading and joins alike.
+            RelationType::MorphMany => $this->morphArm($relation, 'hasMany'),
+            RelationType::MorphOne => $this->morphArm($relation, 'hasOne'),
         };
+    }
+
+    private function morphArm(Relation $relation, string $method): string
+    {
+        return sprintf(
+            "            '%s' => \$this->%s(%s::class, ['%s' => 'id'])\n"
+            . "                ->on(['%s' => '%s']),",
+            $relation->name,
+            $method,
+            $relation->target,
+            $relation->foreignKey,
+            $relation->morphTypeColumn(),
+            $this->module->morphAlias(),
+        );
     }
 
     private function columnExpression(Field $field): string

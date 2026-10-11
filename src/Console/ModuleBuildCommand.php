@@ -6,6 +6,7 @@ namespace App\Console;
 
 use App\Core\Module\Definition\ModuleDefinition;
 use App\Core\Module\ModuleGenerator;
+use App\Core\Module\MorphTargetChecker;
 use App\Core\Module\YamlModuleParser;
 use InvalidArgumentException;
 use RuntimeException;
@@ -22,6 +23,7 @@ use Yiisoft\Yii\Console\ExitCode;
 use function array_fill_keys;
 use function array_keys;
 use function count;
+use function implode;
 use function sprintf;
 
 #[AsCommand(
@@ -61,6 +63,16 @@ final class ModuleBuildCommand extends Command
         }
 
         $io->title(sprintf('Building %d module(s) from %s', count($modules), $file));
+
+        foreach (MorphTargetChecker::missingTargets($modules) as $target => $columns) {
+            $io->note(sprintf(
+                '%s is the target of a polymorphic relation but is not part of this build. Make sure it has '
+                . '`%s`, otherwise the relation queries columns that do not exist.',
+                $target,
+                implode('`, `', $columns),
+            ));
+        }
+
 
         $force = (bool) $input->getOption('force');
         $dryRun = (bool) $input->getOption('dry-run');

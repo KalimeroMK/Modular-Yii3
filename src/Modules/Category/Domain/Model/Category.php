@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Category\Domain\Model;
 
+use App\Modules\Comment\Domain\Model\Comment;
 use App\Modules\Product\Domain\Model\Product;
 use DateTimeImmutable;
 use Yiisoft\ActiveRecord\ActiveQueryInterface;
@@ -29,6 +30,8 @@ final class Category extends ActiveRecord
     {
         return match ($name) {
             'products' => $this->hasMany(Product::class, ['category_id' => 'id']),
+            'comments' => $this->hasMany(Comment::class, ['commentable_id' => 'id'])
+                ->on(['commentable_type' => 'category']),
             default => parent::relationQuery($name),
         };
     }

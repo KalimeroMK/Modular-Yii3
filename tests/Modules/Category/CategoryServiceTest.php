@@ -9,7 +9,7 @@ use App\Modules\Category\Application\Dto\CategoryInput;
 use App\Modules\Category\Application\Dto\CategoryResource;
 use App\Modules\Category\Application\Service\CategoryService;
 use App\Modules\Category\Domain\Exception\CategoryNotFoundException;
-use App\Modules\Category\Infrastructure\Migration\M261011121245CreateCategoriesTable;
+use App\Modules\Category\Infrastructure\Migration\M261011122949CreateCategoriesTable;
 use App\Modules\Category\Infrastructure\Persistence\ActiveRecordCategoryRepository;
 
 final class CategoryServiceTest extends ModuleTestCase
@@ -68,7 +68,7 @@ final class CategoryServiceTest extends ModuleTestCase
 
     protected function migrations(): array
     {
-        return [new M261011121245CreateCategoriesTable()];
+        return [new M261011122949CreateCategoriesTable()];
     }
 
     protected function setUp(): void

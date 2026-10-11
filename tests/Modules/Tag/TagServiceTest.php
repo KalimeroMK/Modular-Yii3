@@ -9,7 +9,7 @@ use App\Modules\Tag\Application\Dto\TagInput;
 use App\Modules\Tag\Application\Dto\TagResource;
 use App\Modules\Tag\Application\Service\TagService;
 use App\Modules\Tag\Domain\Exception\TagNotFoundException;
-use App\Modules\Tag\Infrastructure\Migration\M261011121245CreateTagsTable;
+use App\Modules\Tag\Infrastructure\Migration\M261011122949CreateTagsTable;
 use App\Modules\Tag\Infrastructure\Persistence\ActiveRecordTagRepository;
 
 final class TagServiceTest extends ModuleTestCase
@@ -68,7 +68,7 @@ final class TagServiceTest extends ModuleTestCase
 
     protected function migrations(): array
     {
-        return [new M261011121245CreateTagsTable()];
+        return [new M261011122949CreateTagsTable()];
     }
 
     protected function setUp(): void

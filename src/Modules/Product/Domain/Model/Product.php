@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Product\Domain\Model;
 
 use App\Modules\Category\Domain\Model\Category;
+use App\Modules\Comment\Domain\Model\Comment;
 use App\Modules\Tag\Domain\Model\Tag;
 use DateTimeImmutable;
 use Yiisoft\ActiveRecord\ActiveQueryInterface;
@@ -39,6 +40,8 @@ final class Product extends ActiveRecord
             'category' => $this->hasOne(Category::class, ['id' => 'category_id']),
             'tags' => $this->hasMany(Tag::class, ['id' => 'tag_id'])
                 ->viaTable('{{%product_tag}}', ['product_id' => 'id']),
+            'comments' => $this->hasMany(Comment::class, ['commentable_id' => 'id'])
+                ->on(['commentable_type' => 'product']),
             default => parent::relationQuery($name),
         };
     }

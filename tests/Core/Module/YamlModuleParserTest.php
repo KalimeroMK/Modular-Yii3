@@ -101,10 +101,88 @@ final class YamlModuleParserTest extends TestCase
         self::assertSame('categories', $this->parse(['Category' => ['fields' => ['name' => 'string']]])->table);
     }
 
-    public function testPolymorphicRelationsAreRejectedWithAnExplicitMessage(): void
+    public function testMorphRelationGivesTheTargetItsColumnsAndIndex(): void
+    {
+        $modules = (new YamlModuleParser())->parse([
+            'modules' => [
+                'Product' => [
+                    'fields' => ['name' => 'string'],
+                    'relations' => ['comments' => 'morphMany:Comment:commentable'],
+                ],
+                'Comment' => ['fields' => ['body' => 'text']],
+            ],
+        ]);
+
+        $comment = $modules[1];
+        $columnNames = array_map(static fn($field): string => $field->name, $comment->fields);
+
+        self::assertSame(['body', 'commentable_type', 'commentable_id'], $columnNames);
+        self::assertSame(
+            [['name' => 'idx_comments_commentable', 'columns' => ['commentable_type', 'commentable_id']]],
+            $comment->indexes,
+        );
+    }
+
+    public function testMorphTargetCollectsEveryOwner(): void
+    {
+        $modules = (new YamlModuleParser())->parse([
+            'modules' => [
+                'Product' => [
+                    'fields' => ['name' => 'string'],
+                    'relations' => ['comments' => 'morphMany:Comment:commentable'],
+                ],
+                'BlogPost' => [
+                    'fields' => ['title' => 'string'],
+                    'relations' => ['comments' => 'morphMany:Comment:commentable'],
+                ],
+                'Comment' => ['fields' => ['body' => 'text']],
+            ],
+        ]);
+
+        $target = $modules[2]->morphTargets[0];
+
+        self::assertSame('commentable', $target->name);
+        self::assertSame(['blog_post' => 'BlogPost', 'product' => 'Product'], $target->owners);
+        self::assertSame('CommentableResolver', $target->resolverClass());
+    }
+
+    public function testTargetColumnsDeclaredByHandAreNotDuplicated(): void
+    {
+        $modules = (new YamlModuleParser())->parse([
+            'modules' => [
+                'Product' => [
+                    'fields' => ['name' => 'string'],
+                    'relations' => ['comments' => 'morphMany:Comment:commentable'],
+                ],
+                'Comment' => [
+                    'fields' => ['body' => 'text', 'commentable_type' => 'string:64'],
+                ],
+            ],
+        ]);
+
+        $columnNames = array_map(static fn($field): string => $field->name, $modules[1]->fields);
+
+        self::assertSame(['body', 'commentable_type', 'commentable_id'], $columnNames);
+        self::assertSame(64, $modules[1]->fields[1]->size);
+    }
+
+    public function testMorphRelationWithoutAMorphNameIsRejected(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/no polymorphic relations/');
+        $this->expectExceptionMessageMatches('/needs a morph name/');
+
+        $this->parse([
+            'Product' => [
+                'fields' => ['name' => 'string'],
+                'relations' => ['comments' => 'morphMany:Comment'],
+            ],
+        ]);
+    }
+
+    public function testMorphToPointsAtTheGeneratedResolver(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessageMatches('/resolver service/');
 
         $this->parse([
             'Comment' => [

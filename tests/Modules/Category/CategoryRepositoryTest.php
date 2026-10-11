@@ -6,7 +6,7 @@ namespace App\Tests\Modules\Category;
 
 use App\Modules\Category\Domain\Model\Category;
 use App\Modules\Category\Domain\Repository\CategoryRepositoryInterface;
-use App\Modules\Category\Infrastructure\Migration\M261011121245CreateCategoriesTable;
+use App\Modules\Category\Infrastructure\Migration\M261011122949CreateCategoriesTable;
 use App\Modules\Category\Infrastructure\Persistence\ActiveRecordCategoryRepository;
 use App\Tests\Support\ModuleTestCase;
 
@@ -64,7 +64,7 @@ final class CategoryRepositoryTest extends ModuleTestCase
 
     protected function migrations(): array
     {
-        return [new M261011121245CreateCategoriesTable()];
+        return [new M261011122949CreateCategoriesTable()];
     }
 
     protected function setUp(): void

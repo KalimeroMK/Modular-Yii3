@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Console;
 
 use App\Core\Module\ModuleGenerator;
+use App\Core\Module\MorphTargetChecker;
 use App\Core\Module\Naming;
 use App\Core\Module\YamlModuleParser;
 use InvalidArgumentException;
@@ -19,6 +20,7 @@ use Yiisoft\Yii\Console\ExitCode;
 
 use function count;
 use function explode;
+use function implode;
 use function sprintf;
 
 #[AsCommand(
@@ -89,6 +91,7 @@ final class ModuleMakeCommand extends Command
             return ExitCode::DATAERR;
         }
 
+
         $statuses = $this->generator->generate($modules[0], (bool) $input->getOption('force'));
         $rows = [];
 
@@ -98,6 +101,15 @@ final class ModuleMakeCommand extends Command
 
         $io->title($name);
         $io->table(['status', 'file'], $rows);
+
+        foreach (MorphTargetChecker::missingTargets($modules) as $target => $columns) {
+            $io->note(sprintf(
+                '%s is the target of a polymorphic relation but is not part of this build. Make sure it has '
+                . '`%s`, otherwise the relation queries columns that do not exist.',
+                $target,
+                implode('`, `', $columns),
+            ));
+        }
         $io->success('Done. Run `./yii migrate:up` to create the table.');
 
         return ExitCode::OK;

@@ -5,7 +5,8 @@
 #
 # Field types: string, text, integer, bigint, float, decimal, boolean, json, date, datetime,
 #              timestamp, time, uuid, enum. Add `?` for nullable, `:args` for size/scale/values.
-# Relations:   belongsTo, hasOne, hasMany, belongsToMany.
+# Relations:   belongsTo, hasOne, hasMany, belongsToMany, morphMany, morphOne.
+#              A morph relation takes the morph name last: `morphMany:Comment:commentable`.
 
 modules:
   Product:
@@ -21,6 +22,7 @@ modules:
     relations:
       category: belongsTo:Category
       tags: belongsToMany:Tag
+      comments: morphMany:Comment:commentable
 
   Category:
     fields:
@@ -28,6 +30,7 @@ modules:
       slug: { type: string, size: 150, unique: true }
     relations:
       products: hasMany:Product
+      comments: morphMany:Comment:commentable
 
   Tag:
     fields:
@@ -35,3 +38,11 @@ modules:
       color: string:7
     relations:
       products: belongsToMany:Product
+
+  # The target of the polymorphic relations above. The generator adds `commentable_type` and
+  # `commentable_id` to it, indexes them together, and writes a CommentableResolver to walk the
+  # relation back — Active Record cannot express that direction as a relation.
+  Comment:
+    fields:
+      author: string:120
+      body: text

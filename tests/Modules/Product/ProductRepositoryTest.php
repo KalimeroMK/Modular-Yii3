@@ -6,7 +6,7 @@ namespace App\Tests\Modules\Product;
 
 use App\Modules\Product\Domain\Model\Product;
 use App\Modules\Product\Domain\Repository\ProductRepositoryInterface;
-use App\Modules\Product\Infrastructure\Migration\M261011121245CreateProductsTable;
+use App\Modules\Product\Infrastructure\Migration\M261011122949CreateProductsTable;
 use App\Modules\Product\Infrastructure\Persistence\ActiveRecordProductRepository;
 use App\Tests\Support\ModuleTestCase;
 use DateTimeImmutable;
@@ -72,7 +72,7 @@ final class ProductRepositoryTest extends ModuleTestCase
 
     protected function migrations(): array
     {
-        return [new M261011121245CreateProductsTable()];
+        return [new M261011122949CreateProductsTable()];
     }
 
     protected function setUp(): void

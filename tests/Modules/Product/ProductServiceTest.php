@@ -9,7 +9,7 @@ use App\Modules\Product\Application\Dto\ProductInput;
 use App\Modules\Product\Application\Dto\ProductResource;
 use App\Modules\Product\Application\Service\ProductService;
 use App\Modules\Product\Domain\Exception\ProductNotFoundException;
-use App\Modules\Product\Infrastructure\Migration\M261011121245CreateProductsTable;
+use App\Modules\Product\Infrastructure\Migration\M261011122949CreateProductsTable;
 use App\Modules\Product\Infrastructure\Persistence\ActiveRecordProductRepository;
 
 final class ProductServiceTest extends ModuleTestCase
@@ -82,7 +82,7 @@ final class ProductServiceTest extends ModuleTestCase
 
     protected function migrations(): array
     {
-        return [new M261011121245CreateProductsTable()];
+        return [new M261011122949CreateProductsTable()];
     }
 
     protected function setUp(): void

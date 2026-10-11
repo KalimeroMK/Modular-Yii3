@@ -17,6 +17,8 @@ final readonly class ModuleDefinition
     /**
      * @param list<Field> $fields
      * @param list<Relation> $relations
+     * @param list<MorphTarget> $morphTargets Polymorphic relations pointing at this module.
+     * @param list<array{name: string, columns: list<string>}> $indexes Composite indexes for the table.
      */
     public function __construct(
         public string $name,
@@ -27,7 +29,30 @@ final readonly class ModuleDefinition
         public bool $tests = true,
         public bool $timestamps = true,
         public bool $softDelete = false,
+        public array $morphTargets = [],
+        public array $indexes = [],
     ) {}
+
+    /**
+     * @param list<Field> $fields
+     * @param list<MorphTarget> $morphTargets
+     * @param list<array{name: string, columns: list<string>}> $indexes
+     */
+    public function withMorphTargets(array $fields, array $morphTargets, array $indexes): self
+    {
+        return new self(
+            $this->name,
+            $this->table,
+            $fields,
+            $this->relations,
+            $this->api,
+            $this->tests,
+            $this->timestamps,
+            $this->softDelete,
+            $morphTargets,
+            $indexes,
+        );
+    }
 
     public function namespace(): string
     {
@@ -62,6 +87,27 @@ final readonly class ModuleDefinition
     public function owningRelations(): array
     {
         return array_values(array_filter($this->relations, static fn(Relation $r): bool => $r->ownsColumn()));
+    }
+
+    /**
+     * Polymorphic relations this module declares on other modules.
+     *
+     * @return list<Relation>
+     */
+    public function morphRelations(): array
+    {
+        return array_values(array_filter(
+            $this->relations,
+            static fn(Relation $r): bool => $r->type->isMorph(),
+        ));
+    }
+
+    /**
+     * The value stored in a target's `*_type` column for rows owned by this module.
+     */
+    public function morphAlias(): string
+    {
+        return Naming::snake($this->name);
     }
 
     /**

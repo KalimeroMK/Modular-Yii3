@@ -6,7 +6,7 @@ namespace App\Tests\Modules\Tag;
 
 use App\Modules\Tag\Domain\Model\Tag;
 use App\Modules\Tag\Domain\Repository\TagRepositoryInterface;
-use App\Modules\Tag\Infrastructure\Migration\M261011121245CreateTagsTable;
+use App\Modules\Tag\Infrastructure\Migration\M261011122949CreateTagsTable;
 use App\Modules\Tag\Infrastructure\Persistence\ActiveRecordTagRepository;
 use App\Tests\Support\ModuleTestCase;
 
@@ -64,7 +64,7 @@ final class TagRepositoryTest extends ModuleTestCase
 
     protected function migrations(): array
     {
-        return [new M261011121245CreateTagsTable()];
+        return [new M261011122949CreateTagsTable()];
     }
 
     protected function setUp(): void

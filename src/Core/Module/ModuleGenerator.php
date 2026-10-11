@@ -99,6 +99,18 @@ final readonly class ModuleGenerator
             $moduleDirectory . '/Config/di.php' => $this->renderer->render('Config/di', $placeholders),
         ];
 
+        foreach ($module->morphTargets as $target) {
+            $files[$moduleDirectory . '/Application/Service/' . $target->resolverClass() . '.php']
+                = $this->renderer->render('Resolver', [
+                    ...$placeholders,
+                    'resolverClass' => $target->resolverClass(),
+                    'resolverUses' => $fragments->resolverUses($target),
+                    'resolverMap' => $fragments->resolverMap($target),
+                    'morphTypeColumn' => $target->typeColumn(),
+                    'morphIdColumn' => $target->idColumn(),
+                ]);
+        }
+
         foreach ($module->enumFields() as $field) {
             $enumName = $field->enumClass($name);
             $files[$moduleDirectory . '/Domain/Enum/' . $enumName . '.php'] = $this->renderer->render(

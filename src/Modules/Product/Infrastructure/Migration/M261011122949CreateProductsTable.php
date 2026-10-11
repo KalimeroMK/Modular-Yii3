@@ -8,7 +8,7 @@ use Yiisoft\Db\Migration\MigrationBuilder;
 use Yiisoft\Db\Migration\RevertibleMigrationInterface;
 use Yiisoft\Db\Migration\TransactionalMigrationInterface;
 
-final class M261011121245CreateProductsTable implements RevertibleMigrationInterface, TransactionalMigrationInterface
+final class M261011122949CreateProductsTable implements RevertibleMigrationInterface, TransactionalMigrationInterface
 {
     public function up(MigrationBuilder $b): void
     {

@@ -103,12 +103,49 @@ Date and time columns are the one place where the model and the request differ: 
 | `profile: hasOne:Profile` | `hasOne` relation keyed on the other table |
 | `comments: hasMany:Comment` | `hasMany` relation keyed on the other table |
 | `tags: belongsToMany:Tag` | junction table `product_tag` + `hasMany(...)->viaTable(...)` |
+| `comments: morphMany:Comment:commentable` | `hasMany(...)->on(['commentable_type' => 'product'])` |
+| `cover: morphOne:Image:imageable` | `hasOne(...)->on(['imageable_type' => 'product'])` |
 
 The foreign key can be overridden: `owner: belongsTo:User:owner_id`.
 
-Polymorphic relations (`morphTo`, `morphMany`) are **not** supported — `yiisoft/active-record` has no
-equivalent, and the parser rejects them with an explicit message rather than generating something that only
-looks like one. Model the same thing with an explicit foreign key.
+### Polymorphic relations
+
+Active Record has no `morphMany`, but it has `->on()`, which narrows a relation query in lazy loading, eager
+loading and joins alike — so `morphMany` and `morphOne` generate a relation that behaves like one. Declare
+them on the owning modules:
+
+```yaml
+Product:
+  relations:
+    comments: morphMany:Comment:commentable
+Category:
+  relations:
+    comments: morphMany:Comment:commentable
+Comment:
+  fields:
+    body: text
+```
+
+`Comment` then gets `commentable_type` and `commentable_id`, a composite index over the pair, and a
+`CommentableResolver` holding the owner map:
+
+```php
+private const MAP = [
+    'category' => Category::class,
+    'product' => Product::class,
+];
+```
+
+The inverse direction — `morphTo` — is the one thing that cannot be a relation, because the target class
+differs per row. That is what the resolver is for, and declaring `morphTo` in YAML points you at it.
+
+Worth weighing before reaching for this: a polymorphic foreign key cannot have a database constraint, so the
+database can no longer tell you that `commentable_id = 42` exists. A table per owner, or a shared parent
+table that both owners have a row in, keeps referential integrity. Polymorphism is the right call when the
+set of owners is open-ended, not when it happens to be two.
+
+If a morph target is not part of the same build, `module:build` says so and tells you which columns it needs
+— the generator can only add them to a module it is generating.
 
 ## What gets generated
 
@@ -118,6 +155,7 @@ src/Modules/Product/
 │   ├── Action/           IndexAction, ViewAction, CreateAction, UpdateAction, DeleteAction
 │   ├── Dto/              ProductInput (hydrated + validated), ProductResource (response shape)
 │   └── Service/          ProductService — the only place business logic belongs
+│                         (+ a morph resolver, on modules that are a polymorphic target)
 ├── Config/
 │   ├── di.php            repository interface → implementation
 │   └── routes.php        /api/products route group
